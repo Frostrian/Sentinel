@@ -41,7 +41,7 @@
             label4 = new Label();
             label5 = new Label();
             label6 = new Label();
-            richTextBox1 = new RichTextBox();
+            rtbCihazInfo = new RichTextBox();
             label7 = new Label();
             label8 = new Label();
             SuspendLayout();
@@ -85,6 +85,7 @@
             listBoxDevices.Name = "listBoxDevices";
             listBoxDevices.Size = new Size(437, 799);
             listBoxDevices.TabIndex = 0;
+            listBoxDevices.SelectedIndexChanged += listBoxDevices_SelectedIndexChanged;
             // 
             // txtLog
             // 
@@ -156,13 +157,13 @@
             label6.TabIndex = 2;
             label6.Text = "Hareket Data";
             // 
-            // richTextBox1
+            // rtbCihazInfo
             // 
-            richTextBox1.Location = new Point(1307, 29);
-            richTextBox1.Name = "richTextBox1";
-            richTextBox1.Size = new Size(290, 475);
-            richTextBox1.TabIndex = 1;
-            richTextBox1.Text = "";
+            rtbCihazInfo.Location = new Point(1307, 29);
+            rtbCihazInfo.Name = "rtbCihazInfo";
+            rtbCihazInfo.Size = new Size(290, 475);
+            rtbCihazInfo.TabIndex = 1;
+            rtbCihazInfo.Text = "";
             // 
             // label7
             // 
@@ -195,7 +196,7 @@
             Controls.Add(label2);
             Controls.Add(label7);
             Controls.Add(label1);
-            Controls.Add(richTextBox1);
+            Controls.Add(rtbCihazInfo);
             Controls.Add(txtLog);
             Controls.Add(listBoxAlerts);
             Controls.Add(listBoxAlarmData);
@@ -225,7 +226,7 @@
         private Label label4;
         private Label label5;
         private Label label6;
-        private RichTextBox richTextBox1;
+        private RichTextBox rtbCihazInfo;
         private Label label7;
         private Label label8;
     }

@@ -4,6 +4,7 @@
     {
         private List<DeviceProfile> devices = new();
         private List<DeviceTracker> deviceTracker = new();
+        private Dictionary<string, DeviceProfile> profileLookup = new();
         private MqttService mqtt;
         public FormSentinel()
         {
@@ -12,7 +13,7 @@
             Load += async (s, e) => await mqtt.ConnectAsync();
         }
 
-        SentinelProfileManager profileManager = new SentinelProfileManager(deviceTracker, Log);
+        //SentinelProfileManager profileManager = new SentinelProfileManager(deviceTracker, Log);
 
         private void FormSentinel_Load(object sender, EventArgs e)
         {
@@ -30,6 +31,7 @@
         private void AddDevice(DeviceProfile device)
         {
             devices.Add(device);
+            profileLookup[device.DeviceId] = device;
             listBoxDevices.Invoke((MethodInvoker)(() =>
             {
                 listBoxDevices.Items.Add($"{device.DeviceId} | {device.Ip} | {device.DeviceType}");
@@ -77,6 +79,37 @@
             {
                 box.Items.RemoveAt(0);
             }
+        }
+
+        private void listBoxDevices_SelectedIndexChanged(object sender, EventArgs e)
+        {
+            if (listBoxDevices.SelectedItem == null) return;
+
+            var line = listBoxDevices.SelectedItem.ToString();
+            var deviceId = line.Split('|')[0].Trim();
+
+            if (profileLookup.TryGetValue(deviceId, out var profile))
+            {
+                var info = $"📟 Cihaz ID: {profile.DeviceId}\n" +
+                           $"🌐 IP: {profile.Ip}\n" +
+                           $"🧬 Tür: {profile.DeviceType}\n" +
+                           $"⏱ İlk Görülme: {profile.FirstSeen:yyyy-MM-dd HH:mm:ss}\n" +
+                           $"🔁 Son Görülme: {profile.LastSeen:yyyy-MM-dd HH:mm:ss}\n" +
+                           $"🌡 Son Isı: {FormatTime(profile.LastHeat)}\n" +
+                           $"📶 Son Ping: {FormatTime(profile.LastPing)}\n" +
+                           $"🔋 Son Batarya: {FormatTime(profile.LastBattery)}\n" +
+                           $"📷 Son Kamera: {FormatTime(profile.LastCameraData)}\n" +
+                           $"🧤 Son Parmak İzi: {FormatTime(profile.LastFingerprintData)}\n" +
+                           $"🚨 Son Alarm: {FormatTime(profile.LastAlarmData)}\n" +
+                           $"⚠ Durum: {(profile.IsOffline ? "❌ OFFLINE" : "✅ ONLINE")}";
+
+                rtbCihazInfo.Text = info;
+            }
+        }
+
+        private string FormatTime(DateTime dt)
+        {
+            return dt == DateTime.MinValue ? "Yok" : dt.ToString("yyyy-MM-dd HH:mm:ss");
         }
     }
 }

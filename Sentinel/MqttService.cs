@@ -1,11 +1,13 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Drawing;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using MQTTnet;
 using MQTTnet.Client;
 using MQTTnet.Protocol;
+using static System.Windows.Forms.VisualStyles.VisualStyleElement;
 
 namespace Sentinel
 {
@@ -34,6 +36,7 @@ namespace Sentinel
             uiDispatcher = uiSync;
             RefreshIDSAlerts = refreshIDSCallback;
             factory = new MqttFactory();
+            IDS.SetProfileSource(() => RegisteredDevices);
         }
 
         public async Task ConnectAsync()
@@ -70,13 +73,24 @@ namespace Sentinel
                 var authReq = System.Text.Json.JsonSerializer.Deserialize<AuthRequest>(json);
                 logAction($"🔐 Auth isteği: {authReq.deviceId} / {authReq.ip}");
 
+                var ipConflict = RegisteredDevices
+                    .FirstOrDefault(d => d.Ip == authReq.ip && d.DeviceId != authReq.deviceId);
+
+                if (ipConflict != null)
+                {
+                    logAction($"🛑 IP ÇAKIŞMASI: {authReq.deviceId} ile {ipConflict.DeviceId} aynı IP ({authReq.ip}) kullanıyor!");
+
+                    // Tercihe bağlı: IDS'e de loglatılabilir
+                    IDS.AddExternalAlert($"🛑 IP ÇAKIŞMASI: {authReq.deviceId} ile {ipConflict.DeviceId} aynı IP ({authReq.ip})");
+                }
+
                 var profile = new DeviceProfile
                 {
                     DeviceId = authReq.deviceId,
                     Ip = authReq.ip,
                     DeviceType = GuessDeviceType(authReq.deviceId),
-                    ConnectedAt = DateTime.Now,
-                    LastMessageTime = DateTime.Now
+                    FirstSeen = DateTime.Now,
+                    LastPing = DateTime.Now
                 };
 
                 RegisteredDevices.Add(profile);
@@ -87,7 +101,7 @@ namespace Sentinel
                 client.PublishAsync(new MqttApplicationMessageBuilder()
                     .WithTopic(responseTopic)
                     .WithPayload(responseJson)
-                    .WithQualityOfServiceLevel(MqttQualityOfServiceLevel.AtLeastOnce)
+                    .WithQualityOfServiceLevel(MQTTnet.Protocol.MqttQualityOfServiceLevel.AtLeastOnce)
                     .Build());
 
                 onDeviceAuth(profile);
@@ -98,10 +112,9 @@ namespace Sentinel
             }
         }
 
+
         private void HandleData(string topic, string payload)
         {
-
-
             var deviceId = ExtractDeviceId(topic);
             var profile = RegisteredDevices.FirstOrDefault(x => x.DeviceId == deviceId);
             if (profile != null)
@@ -114,13 +127,13 @@ namespace Sentinel
                     onDataReceived(topic, payload);
                     RefreshIDSAlerts();
                 });
+
+                profile.LastSeen = DateTime.Now;
+
+                if (topic.Contains("heat")) profile.LastHeat = DateTime.Now;
+                else if (topic.Contains("ping")) profile.LastPing = DateTime.Now;
+                else if (topic.Contains("battery")) profile.LastBattery = DateTime.Now;
             }
-
-            profile.LastSeen = DateTime.Now;
-
-            if (topic.Contains("heat")) profile.LastHeat = DateTime.Now;
-            else if (topic.Contains("ping")) profile.LastPing = DateTime.Now;
-            else if (topic.Contains("battery")) profile.LastBattery = DateTime.Now;
         }
 
         private string ExtractDeviceId(string topic)

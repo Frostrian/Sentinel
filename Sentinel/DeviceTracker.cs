@@ -46,11 +46,11 @@ public class DeviceTracker
         if (ipConflict != null)
         {
             // IDS uyarısı: IP adresi farklı cihazlar tarafından kullanılıyor
-            Log($"🛑 IDS: IP çakışması! {deviceId} ve {ipConflict.DeviceId} aynı IP ({ip}) ile veri gönderiyor.");
+            //Log($"🛑 IDS: IP çakışması! {deviceId} ve {ipConflict.DeviceId} aynı IP ({ip}) ile veri gönderiyor.");
         }
     }
 
-    public void CheckTimeouts(Action<DeviceProfile> onTimeout, int timeoutSeconds = 120)
+    public void CheckTimeouts(Action<DeviceProfile> onTimeout, int timeoutSeconds = 1200)
     {
         foreach (var profile in _profiles.Values)
         {
