@@ -1,4 +1,6 @@
-﻿namespace Sentinel
+﻿using static System.Runtime.InteropServices.JavaScript.JSType;
+
+namespace Sentinel
 {
     public partial class FormSentinel : Form
     {
@@ -44,24 +46,33 @@
         {
             string entry = $"{DateTime.Now:HH:mm:ss} → {topic} | {payload}";
 
+            //if (topic.StartsWith("sensor/"))
+            //{
+            //    listBoxSensorData.Items.Add($"{DateTime.Now:HH:mm:ss} → {topic} | {payload}");
+            //    TrimList(listBoxSensorData);
+            //    labelSensorInfo.Text = $"Isı: {GetIntervalInfo(profile.HeatTimestamps)}";
+            //}
+
             if (topic.StartsWith("sensor/"))
             {
-                listBoxSensorData.Items.Add(entry);
+                //profileLookup.TryGetValue(deviceId, out var profile);
+                listBoxSensorData.Items.Add($"{DateTime.Now:HH:mm:ss} → {topic} | {payload}");
                 TrimList(listBoxSensorData);
+                labelSensorInfo.Text = $"Isı: {GetIntervalInfo(profile.HeatTimestamps)}";
             }
             else if (topic.StartsWith("camera/"))
             {
-                listBoxCameraData.Items.Add(entry);
+                listBoxSensorData.Items.Add($"{DateTime.Now:HH:mm:ss} → {topic} | {payload}");
                 TrimList(listBoxCameraData);
             }
             else if (topic.StartsWith("alarm/"))
             {
-                listBoxAlarmData.Items.Add(entry);
+                listBoxSensorData.Items.Add($"{DateTime.Now:HH:mm:ss} → {topic} | {payload}");
                 TrimList(listBoxAlarmData);
             }
             else if (topic.StartsWith("fingerprint/"))
             {
-                listBoxFingerprintData.Items.Add(entry);
+                listBoxSensorData.Items.Add($"{DateTime.Now:HH:mm:ss} → {topic} | {payload}");
                 TrimList(listBoxFingerprintData);
             }
         }
@@ -77,10 +88,20 @@
 
         private void TrimList(ListBox box)
         {
-            while (box.Items.Count > 1000)
-            {
+            while (box.Items.Count > 10)  // önceki 1000'di
                 box.Items.RemoveAt(0);
-            }
+        }
+
+        private string GetIntervalInfo(List<DateTime> timestamps)
+        {
+            if (timestamps.Count < 2) return "veri yetersiz";
+
+            var intervals = new List<double>();
+            for (int i = 1; i < timestamps.Count; i++)
+                intervals.Add((timestamps[i] - timestamps[i - 1]).TotalSeconds);
+
+            var avg = intervals.Average();
+            return $"{avg:F1}s ort";
         }
 
         private void listBoxDevices_SelectedIndexChanged(object sender, EventArgs e)

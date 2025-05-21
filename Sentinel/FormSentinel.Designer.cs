@@ -44,6 +44,10 @@
             rtbCihazInfo = new RichTextBox();
             label7 = new Label();
             label8 = new Label();
+            labelSensorInfo = new Label();
+            labelCameraInfo = new Label();
+            labelFPInfo = new Label();
+            labelAlarmInfo = new Label();
             SuspendLayout();
             // 
             // listBoxSensorData
@@ -183,6 +187,42 @@
             label8.TabIndex = 2;
             label8.Text = "Log Listesi";
             // 
+            // labelSensorInfo
+            // 
+            labelSensorInfo.AutoSize = true;
+            labelSensorInfo.Location = new Point(108, 9);
+            labelSensorInfo.Name = "labelSensorInfo";
+            labelSensorInfo.Size = new Size(90, 15);
+            labelSensorInfo.TabIndex = 2;
+            labelSensorInfo.Text = "Veri bekleniyor..";
+            // 
+            // labelCameraInfo
+            // 
+            labelCameraInfo.AutoSize = true;
+            labelCameraInfo.Location = new Point(108, 140);
+            labelCameraInfo.Name = "labelCameraInfo";
+            labelCameraInfo.Size = new Size(90, 15);
+            labelCameraInfo.TabIndex = 2;
+            labelCameraInfo.Text = "Veri bekleniyor..";
+            // 
+            // labelFPInfo
+            // 
+            labelFPInfo.AutoSize = true;
+            labelFPInfo.Location = new Point(108, 270);
+            labelFPInfo.Name = "labelFPInfo";
+            labelFPInfo.Size = new Size(90, 15);
+            labelFPInfo.TabIndex = 2;
+            labelFPInfo.Text = "Veri bekleniyor..";
+            // 
+            // labelAlarmInfo
+            // 
+            labelAlarmInfo.AutoSize = true;
+            labelAlarmInfo.Location = new Point(108, 400);
+            labelAlarmInfo.Name = "labelAlarmInfo";
+            labelAlarmInfo.Size = new Size(90, 15);
+            labelAlarmInfo.TabIndex = 2;
+            labelAlarmInfo.Text = "Veri bekleniyor..";
+            // 
             // FormSentinel
             // 
             AutoScaleDimensions = new SizeF(7F, 15F);
@@ -191,6 +231,10 @@
             Controls.Add(label6);
             Controls.Add(label5);
             Controls.Add(label4);
+            Controls.Add(labelAlarmInfo);
+            Controls.Add(labelFPInfo);
+            Controls.Add(labelCameraInfo);
+            Controls.Add(labelSensorInfo);
             Controls.Add(label3);
             Controls.Add(label8);
             Controls.Add(label2);
@@ -229,5 +273,9 @@
         private RichTextBox rtbCihazInfo;
         private Label label7;
         private Label label8;
+        private Label labelSensorInfo;
+        private Label labelCameraInfo;
+        private Label labelFPInfo;
+        private Label labelAlarmInfo;
     }
 }
