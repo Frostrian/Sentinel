@@ -58,7 +58,7 @@ namespace Sentinel
                 //profileLookup.TryGetValue(deviceId, out var profile);
                 listBoxSensorData.Items.Add($"{DateTime.Now:HH:mm:ss} → {topic} | {payload}");
                 TrimList(listBoxSensorData);
-                labelSensorInfo.Text = $"Isı: {GetIntervalInfo(profile.HeatTimestamps)}";
+                //labelSensorInfo.Text = $"Isı: {GetIntervalInfo(profile.HeatTimestamps)}";
             }
             else if (topic.StartsWith("camera/"))
             {
