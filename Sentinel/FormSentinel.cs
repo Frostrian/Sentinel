@@ -20,6 +20,8 @@
 
         }
 
+ 
+
         public void Log(string msg)
         {
             txtLog.Invoke((MethodInvoker)(() =>
@@ -101,7 +103,15 @@
                            $"📷 Son Kamera: {FormatTime(profile.LastCameraData)}\n" +
                            $"🧤 Son Parmak İzi: {FormatTime(profile.LastFingerprintData)}\n" +
                            $"🚨 Son Alarm: {FormatTime(profile.LastAlarmData)}\n" +
-                           $"⚠ Durum: {(profile.IsOffline ? "❌ OFFLINE" : "✅ ONLINE")}";
+                           $"⚠ Durum: {(profile.IsOffline ? "❌ OFFLINE" : "✅ ONLINE")}\n" +
+                           $"\n📈 Beklenen Veri Aralıkları:\n" +
+                           $"   - Ping: {profile.ExpectedBehavior.ExpectedPingInterval} sn\n" +
+                           $"   - Isı: {profile.ExpectedBehavior.ExpectedHeatInterval} sn\n" +
+                           $"   - Batarya: {profile.ExpectedBehavior.ExpectedBatteryInterval} sn\n" +
+                           $"   - Kamera: {profile.ExpectedBehavior.ExpectedCameraInterval} sn\n" +
+                           $"   - Parmak İzi: {profile.ExpectedBehavior.ExpectedFingerprintInterval} sn\n" +
+                           $"   - Alarm: {profile.ExpectedBehavior.ExpectedAlarmInterval} sn\n" +
+                           $"   - Hareket: {profile.ExpectedBehavior.ExpectedMotionInterval} sn";
 
                 rtbCihazInfo.Text = info;
             }

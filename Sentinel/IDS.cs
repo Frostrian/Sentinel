@@ -24,6 +24,7 @@ public static class IDS
     {
         var now = DateTime.Now;
         string deviceId = profile.DeviceId;
+        AnalyzeBehavior(profile, topic);
 
         if (topic.Contains("ping"))
         {
@@ -97,5 +98,58 @@ public static class IDS
         }
         catch { }
         return false;
+    }
+
+    private static void AnalyzeBehavior(DeviceProfile profile, string topic)
+    {
+        void Check(List<DateTime> times, double expectedSeconds, string label)
+        {
+            if (times.Count < 3) return;
+
+            var intervals = new List<double>();
+            for (int i = 1; i < times.Count; i++)
+                intervals.Add((times[i] - times[i - 1]).TotalSeconds);
+
+            var avg = intervals.Average();
+            if (Math.Abs(avg - expectedSeconds) > expectedSeconds * 0.4) // %40 tolerans
+            {
+                AddAlert(profile.DeviceId, $"{label} veri sıklığı beklenen dışı: ort {avg:F1}s (beklenen {expectedSeconds}s)", topic);
+            }
+
+            // Son 10’dan fazla olmasın
+            while (times.Count > 10)
+                times.RemoveAt(0);
+        }
+
+        if (topic.Contains("heat"))
+        {
+            profile.HeatTimestamps.Add(DateTime.Now);
+            Check(profile.HeatTimestamps, profile.ExpectedBehavior.ExpectedHeatInterval, "Isı");
+        }
+        if (topic.Contains("ping"))
+        {
+            profile.PingTimestamps.Add(DateTime.Now);
+            Check(profile.PingTimestamps, profile.ExpectedBehavior.ExpectedPingInterval, "Ping");
+        }
+        if (topic.Contains("battery"))
+        {
+            profile.BatteryTimestamps.Add(DateTime.Now);
+            Check(profile.BatteryTimestamps, profile.ExpectedBehavior.ExpectedBatteryInterval, "Batarya");
+        }
+        if (topic.Contains("frame") || topic.Contains("status"))
+        {
+            profile.CameraTimestamps.Add(DateTime.Now);
+            Check(profile.CameraTimestamps, profile.ExpectedBehavior.ExpectedCameraInterval, "Kamera");
+        }
+        if (topic.Contains("access"))
+        {
+            profile.FingerprintTimestamps.Add(DateTime.Now);
+            Check(profile.FingerprintTimestamps, profile.ExpectedBehavior.ExpectedFingerprintInterval, "Parmak izi");
+        }
+        if (topic.Contains("alarm"))
+        {
+            profile.AlarmTimestamps.Add(DateTime.Now);
+            Check(profile.AlarmTimestamps, profile.ExpectedBehavior.ExpectedAlarmInterval, "Alarm");
+        }
     }
 }
