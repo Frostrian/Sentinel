@@ -42,38 +42,78 @@ namespace Sentinel
             }));
         }
 
+        private string ExtractDeviceId(string topic)
+        {
+            var parts = topic.Split('/');
+            return parts.Length > 1 ? parts[1] : "UNKNOWN";
+        }
+
         private void HandleDataDisplay(string topic, string payload)
         {
             string entry = $"{DateTime.Now:HH:mm:ss} → {topic} | {payload}";
+            string deviceId = ExtractDeviceId(topic);
 
-            //if (topic.StartsWith("sensor/"))
-            //{
-            //    listBoxSensorData.Items.Add($"{DateTime.Now:HH:mm:ss} → {topic} | {payload}");
-            //    TrimList(listBoxSensorData);
-            //    labelSensorInfo.Text = $"Isı: {GetIntervalInfo(profile.HeatTimestamps)}";
-            //}
+            if (topic.StartsWith("auth/"))
+            {
+                
+                return;
+            }
 
-            if (topic.StartsWith("sensor/"))
+            if (topic.Contains("/motion"))
             {
-                //profileLookup.TryGetValue(deviceId, out var profile);
-                listBoxSensorData.Items.Add($"{DateTime.Now:HH:mm:ss} → {topic} | {payload}");
-                TrimList(listBoxSensorData);
-                //labelSensorInfo.Text = $"Isı: {GetIntervalInfo(profile.HeatTimestamps)}";
-            }
-            else if (topic.StartsWith("camera/"))
-            {
-                listBoxSensorData.Items.Add($"{DateTime.Now:HH:mm:ss} → {topic} | {payload}");
-                TrimList(listBoxCameraData);
-            }
-            else if (topic.StartsWith("alarm/"))
-            {
-                listBoxSensorData.Items.Add($"{DateTime.Now:HH:mm:ss} → {topic} | {payload}");
+                listBoxAlarmData.Items.Add(entry);
                 TrimList(listBoxAlarmData);
+
+                if (profileLookup.TryGetValue(deviceId, out var profile))
+                    labelAlarmInfo.Text = $"Hareket: {GetIntervalInfo(profile.MotionTimestamps)}";
             }
-            else if (topic.StartsWith("fingerprint/"))
+            else if (topic.Contains("/status") && topic.StartsWith("alarm/"))
             {
-                listBoxSensorData.Items.Add($"{DateTime.Now:HH:mm:ss} → {topic} | {payload}");
+                listBoxAlarmData.Items.Add(entry);
+                TrimList(listBoxAlarmData);
+
+                if (profileLookup.TryGetValue(deviceId, out var profile))
+                    labelAlarmInfo.Text = $"Alarm: {GetIntervalInfo(profile.AlarmTimestamps)}";
+            }
+            else if (topic.Contains("/status") && topic.StartsWith("camera/") || topic.Contains("/frame"))
+            {
+                listBoxCameraData.Items.Add(entry);
+                TrimList(listBoxCameraData);
+
+                if (profileLookup.TryGetValue(deviceId, out var profile))
+                    labelCameraInfo.Text = $"Kamera: {GetIntervalInfo(profile.CameraTimestamps)}";
+            }
+            else if (topic.Contains("/access"))
+            {
+                listBoxFingerprintData.Items.Add(entry);
                 TrimList(listBoxFingerprintData);
+
+                if (profileLookup.TryGetValue(deviceId, out var profile))
+                    labelFPInfo.Text = $"FP: {GetIntervalInfo(profile.FingerprintTimestamps)}";
+            }
+            else if (topic.Contains("/heat"))
+            {
+                listBoxSensorData.Items.Add(entry);
+                TrimList(listBoxSensorData);
+
+                if (profileLookup.TryGetValue(deviceId, out var profile))
+                    labelSensorInfo.Text = $"Isı: {GetIntervalInfo(profile.HeatTimestamps)}";
+            }
+            else if (topic.Contains("/ping"))
+            {
+                listBoxSensorData.Items.Add(entry);
+                TrimList(listBoxSensorData);
+            }
+            else if (topic.Contains("/battery"))
+            {
+                listBoxSensorData.Items.Add(entry);
+                TrimList(listBoxSensorData);
+            }
+            else
+            {
+                // fallback
+                listBoxSensorData.Items.Add(entry);
+                TrimList(listBoxSensorData);
             }
         }
 

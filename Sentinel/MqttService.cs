@@ -130,9 +130,13 @@ namespace Sentinel
 
                 profile.LastSeen = DateTime.Now;
 
-                if (topic.Contains("heat")) profile.LastHeat = DateTime.Now;
-                else if (topic.Contains("ping")) profile.LastPing = DateTime.Now;
-                else if (topic.Contains("battery")) profile.LastBattery = DateTime.Now;
+                if (topic.Contains("/heat")) profile.LastHeat = DateTime.Now;
+                else if (topic.Contains("/ping")) profile.LastPing = DateTime.Now;
+                else if (topic.Contains("/battery")) profile.LastBattery = DateTime.Now;
+                else if (topic.Contains("/motion")) profile.LastMotionData = DateTime.Now;
+                else if (topic.Contains("/status")) profile.LastAlarmData = DateTime.Now; // alarm durumu
+                else if (topic.Contains("/access")) profile.LastFingerprintData = DateTime.Now;
+                else if (topic.Contains("/frame")) profile.LastCameraData = DateTime.Now;
             }
         }
 
