@@ -48,6 +48,7 @@
             labelCameraInfo = new Label();
             labelFPInfo = new Label();
             labelAlarmInfo = new Label();
+            labelTraffic = new Label();
             SuspendLayout();
             // 
             // listBoxSensorData
@@ -223,6 +224,15 @@
             labelAlarmInfo.TabIndex = 2;
             labelAlarmInfo.Text = "Veri bekleniyor..";
             // 
+            // labelTraffic
+            // 
+            labelTraffic.AutoSize = true;
+            labelTraffic.Location = new Point(1318, 517);
+            labelTraffic.Name = "labelTraffic";
+            labelTraffic.Size = new Size(90, 15);
+            labelTraffic.TabIndex = 2;
+            labelTraffic.Text = "Veri bekleniyor..";
+            // 
             // FormSentinel
             // 
             AutoScaleDimensions = new SizeF(7F, 15F);
@@ -234,6 +244,7 @@
             Controls.Add(labelAlarmInfo);
             Controls.Add(labelFPInfo);
             Controls.Add(labelCameraInfo);
+            Controls.Add(labelTraffic);
             Controls.Add(labelSensorInfo);
             Controls.Add(label3);
             Controls.Add(label8);
@@ -277,5 +288,6 @@
         private Label labelCameraInfo;
         private Label labelFPInfo;
         private Label labelAlarmInfo;
+        private Label labelTraffic;
     }
 }

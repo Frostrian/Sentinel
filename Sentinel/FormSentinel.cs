@@ -99,6 +99,11 @@ namespace Sentinel
                 if (profileLookup.TryGetValue(deviceId, out var profile))
                     labelSensorInfo.Text = $"Isı: {GetIntervalInfo(profile.HeatTimestamps)}";
             }
+            else if (topic.Contains("/ping") && topic.StartsWith("alarm/"))
+            {
+                listBoxAlarmData.Items.Add(entry);
+                TrimList(listBoxSensorData);
+            }
             else if (topic.Contains("/ping"))
             {
                 listBoxSensorData.Items.Add(entry);
