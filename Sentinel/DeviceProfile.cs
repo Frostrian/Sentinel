@@ -43,11 +43,11 @@ namespace Sentinel
         {
             ExpectedPingInterval = 25,
             ExpectedHeatInterval = 50,
-            ExpectedBatteryInterval = 100,
-            ExpectedCameraInterval = 30,
-            ExpectedAlarmInterval = 120,
+            ExpectedBatteryInterval = 150,
+            ExpectedCameraInterval = 15,
+            ExpectedAlarmInterval = 50,
             ExpectedFingerprintInterval = 60,
-            ExpectedMotionInterval = 30
+            ExpectedMotionInterval = 60
         };
 
         public class DeviceBehaviorProfile

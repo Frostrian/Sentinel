@@ -85,6 +85,8 @@ public static class IDS
         var message = $"⚠ IDS Uyarısı: {deviceId} - {reason} - [{topic}]";
         Alerts.Add(message);
         Console.WriteLine(message);
+
+        IDSLogger.Log(deviceId, reason, topic);
     }
 
     private static bool TryExtract(string json, string key, out double value)

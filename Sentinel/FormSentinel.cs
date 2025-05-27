@@ -41,39 +41,57 @@ namespace Sentinel
                 listBoxDevices.Items.Add($"{device.DeviceId} | {device.Ip} | {device.DeviceType}");
             }));
         }
+        private string ExtractDeviceId(string topic)
+        {
+            var parts = topic.Split('/');
+            return parts.Length > 1 ? parts[1] : "UNKNOWN";
+        }
 
         private void HandleDataDisplay(string topic, string payload)
         {
             string entry = $"{DateTime.Now:HH:mm:ss} → {topic} | {payload}";
+            string deviceId = ExtractDeviceId(topic);
 
-            //if (topic.StartsWith("sensor/"))
-            //{
-            //    listBoxSensorData.Items.Add($"{DateTime.Now:HH:mm:ss} → {topic} | {payload}");
-            //    TrimList(listBoxSensorData);
-            //    labelSensorInfo.Text = $"Isı: {GetIntervalInfo(profile.HeatTimestamps)}";
-            //}
-
-            if (topic.StartsWith("sensor/"))
+            // 🔁 Motion önce kontrol edilmeli!
+            if (topic.Contains("motion"))
             {
-                //profileLookup.TryGetValue(deviceId, out var profile);
-                listBoxSensorData.Items.Add($"{DateTime.Now:HH:mm:ss} → {topic} | {payload}");
+                listBoxAlarmData.Items.Add(entry); 
+                TrimList(listBoxAlarmData);
+
+                if (profileLookup.TryGetValue(deviceId, out var profile))
+                    labelAlarmInfo.Text = $"Hareket: {GetIntervalInfo(profile.MotionTimestamps)}";
+            }
+            else if (topic.StartsWith("sensor/"))
+            {
+                listBoxSensorData.Items.Add(entry);
                 TrimList(listBoxSensorData);
-                //labelSensorInfo.Text = $"Isı: {GetIntervalInfo(profile.HeatTimestamps)}";
+
+                if (profileLookup.TryGetValue(deviceId, out var profile))
+                    labelSensorInfo.Text = $"Isı: {GetIntervalInfo(profile.HeatTimestamps)}";
             }
             else if (topic.StartsWith("camera/"))
             {
-                listBoxSensorData.Items.Add($"{DateTime.Now:HH:mm:ss} → {topic} | {payload}");
+                listBoxCameraData.Items.Add(entry);
                 TrimList(listBoxCameraData);
+
+                if (profileLookup.TryGetValue(deviceId, out var profile))
+                    labelCameraInfo.Text = $"Kamera: {GetIntervalInfo(profile.CameraTimestamps)}";
             }
             else if (topic.StartsWith("alarm/"))
             {
-                listBoxSensorData.Items.Add($"{DateTime.Now:HH:mm:ss} → {topic} | {payload}");
+                listBoxAlarmData.Items.Add(entry);
                 TrimList(listBoxAlarmData);
+
+                if (profileLookup.TryGetValue(deviceId, out var profile))
+                    labelAlarmInfo.Text = $"Alarm: {GetIntervalInfo(profile.AlarmTimestamps)}";
             }
             else if (topic.StartsWith("fingerprint/"))
             {
-                listBoxSensorData.Items.Add($"{DateTime.Now:HH:mm:ss} → {topic} | {payload}");
+                listBoxFingerprintData.Items.Add(entry);
                 TrimList(listBoxFingerprintData);
+
+                if (profileLookup.TryGetValue(deviceId, out var profile))
+                    labelFPInfo.Text = $"FP: {GetIntervalInfo(profile.FingerprintTimestamps)}";
             }
         }
 

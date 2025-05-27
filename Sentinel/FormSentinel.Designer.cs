@@ -87,7 +87,7 @@
             listBoxDevices.FormattingEnabled = true;
             listBoxDevices.Location = new Point(864, 28);
             listBoxDevices.Name = "listBoxDevices";
-            listBoxDevices.Size = new Size(437, 799);
+            listBoxDevices.Size = new Size(437, 424);
             listBoxDevices.TabIndex = 0;
             listBoxDevices.SelectedIndexChanged += listBoxDevices_SelectedIndexChanged;
             // 
@@ -163,16 +163,16 @@
             // 
             // rtbCihazInfo
             // 
-            rtbCihazInfo.Location = new Point(1307, 29);
+            rtbCihazInfo.Location = new Point(864, 487);
             rtbCihazInfo.Name = "rtbCihazInfo";
-            rtbCihazInfo.Size = new Size(290, 475);
+            rtbCihazInfo.Size = new Size(437, 345);
             rtbCihazInfo.TabIndex = 1;
             rtbCihazInfo.Text = "";
             // 
             // label7
             // 
             label7.AutoSize = true;
-            label7.Location = new Point(1318, 11);
+            label7.Location = new Point(870, 465);
             label7.Name = "label7";
             label7.Size = new Size(70, 15);
             label7.TabIndex = 2;
@@ -227,7 +227,7 @@
             // 
             AutoScaleDimensions = new SizeF(7F, 15F);
             AutoScaleMode = AutoScaleMode.Font;
-            ClientSize = new Size(1609, 844);
+            ClientSize = new Size(1308, 844);
             Controls.Add(label6);
             Controls.Add(label5);
             Controls.Add(label4);
