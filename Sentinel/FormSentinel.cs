@@ -47,27 +47,12 @@ namespace Sentinel
             return parts.Length > 1 ? parts[1] : "UNKNOWN";
         }
 
-        private string ExtractDeviceId(string topic)
-        {
-            var parts = topic.Split('/');
-            return parts.Length > 1 ? parts[1] : "UNKNOWN";
-        }
-
         private void HandleDataDisplay(string topic, string payload)
         {
             string entry = $"{DateTime.Now:HH:mm:ss} → {topic} | {payload}";
             string deviceId = ExtractDeviceId(topic);
 
-            // 🔁 Motion önce kontrol edilmeli!
-            if (topic.Contains("motion"))
-            {
-                listBoxAlarmData.Items.Add(entry); 
-                TrimList(listBoxAlarmData);
-
-                if (profileLookup.TryGetValue(deviceId, out var profile))
-                    labelAlarmInfo.Text = $"Hareket: {GetIntervalInfo(profile.MotionTimestamps)}";
-            }
-            else if (topic.StartsWith("sensor/"))
+            if (topic.StartsWith("sensor/") && !topic.Contains("motion")) // motion'ı dışla
             {
                 listBoxSensorData.Items.Add(entry);
                 TrimList(listBoxSensorData);
@@ -75,7 +60,7 @@ namespace Sentinel
                 if (profileLookup.TryGetValue(deviceId, out var profile))
                     labelSensorInfo.Text = $"Isı: {GetIntervalInfo(profile.HeatTimestamps)}";
             }
-            else if (topic.Contains("/ping"))
+            else if (topic.StartsWith("camera/"))
             {
                 listBoxCameraData.Items.Add(entry);
                 TrimList(listBoxCameraData);
@@ -83,7 +68,7 @@ namespace Sentinel
                 if (profileLookup.TryGetValue(deviceId, out var profile))
                     labelCameraInfo.Text = $"Kamera: {GetIntervalInfo(profile.CameraTimestamps)}";
             }
-            else if (topic.Contains("/battery"))
+            else if (topic.StartsWith("alarm/"))
             {
                 listBoxAlarmData.Items.Add(entry);
                 TrimList(listBoxAlarmData);
@@ -91,13 +76,21 @@ namespace Sentinel
                 if (profileLookup.TryGetValue(deviceId, out var profile))
                     labelAlarmInfo.Text = $"Alarm: {GetIntervalInfo(profile.AlarmTimestamps)}";
             }
-            else
+            else if (topic.StartsWith("fingerprint/"))
             {
                 listBoxFingerprintData.Items.Add(entry);
                 TrimList(listBoxFingerprintData);
 
                 if (profileLookup.TryGetValue(deviceId, out var profile))
                     labelFPInfo.Text = $"FP: {GetIntervalInfo(profile.FingerprintTimestamps)}";
+            }
+            else if (topic.Contains("motion"))
+            {
+                listBoxAlarmData.Items.Add(entry);
+                TrimList(listBoxAlarmData);
+
+                if (profileLookup.TryGetValue(deviceId, out var profile))
+                    listBoxAlarmData.Text = $"Hareket: {GetIntervalInfo(profile.MotionTimestamps)}";
             }
         }
 
