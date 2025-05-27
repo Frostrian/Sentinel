@@ -47,6 +47,12 @@ namespace Sentinel
             return parts.Length > 1 ? parts[1] : "UNKNOWN";
         }
 
+        private string ExtractDeviceId(string topic)
+        {
+            var parts = topic.Split('/');
+            return parts.Length > 1 ? parts[1] : "UNKNOWN";
+        }
+
         private void HandleDataDisplay(string topic, string payload)
         {
             string entry = $"{DateTime.Now:HH:mm:ss} → {topic} | {payload}";
@@ -69,7 +75,7 @@ namespace Sentinel
                 if (profileLookup.TryGetValue(deviceId, out var profile))
                     labelSensorInfo.Text = $"Isı: {GetIntervalInfo(profile.HeatTimestamps)}";
             }
-            else if (topic.StartsWith("camera/"))
+            else if (topic.Contains("/ping"))
             {
                 listBoxCameraData.Items.Add(entry);
                 TrimList(listBoxCameraData);
@@ -77,7 +83,7 @@ namespace Sentinel
                 if (profileLookup.TryGetValue(deviceId, out var profile))
                     labelCameraInfo.Text = $"Kamera: {GetIntervalInfo(profile.CameraTimestamps)}";
             }
-            else if (topic.StartsWith("alarm/"))
+            else if (topic.Contains("/battery"))
             {
                 listBoxAlarmData.Items.Add(entry);
                 TrimList(listBoxAlarmData);
@@ -85,7 +91,7 @@ namespace Sentinel
                 if (profileLookup.TryGetValue(deviceId, out var profile))
                     labelAlarmInfo.Text = $"Alarm: {GetIntervalInfo(profile.AlarmTimestamps)}";
             }
-            else if (topic.StartsWith("fingerprint/"))
+            else
             {
                 listBoxFingerprintData.Items.Add(entry);
                 TrimList(listBoxFingerprintData);

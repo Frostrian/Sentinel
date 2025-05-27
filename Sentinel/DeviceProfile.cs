@@ -24,10 +24,10 @@ namespace Sentinel
         public DateTime LastAlarmData { get; set; }
         public DateTime LastFingerprintData { get; set; }
         public DateTime LastMotionData { get; set; }
-
         public bool IsOffline { get; set; } = false;
-
         public string Status => IsOffline ? "OFFLINE" : "ONLINE";
+        public int MessageCountLastMinute { get; set; } = 0;
+        public DateTime TrafficWindowStart { get; set; } = DateTime.Now;
 
         // 🔽 Veri davranış analizi için zaman listeleri
         public List<DateTime> PingTimestamps { get; } = new();

@@ -26,6 +26,20 @@ public static class IDS
         string deviceId = profile.DeviceId;
         AnalyzeBehavior(profile, topic);
 
+        if ((now - profile.TrafficWindowStart).TotalSeconds > 60)
+        {
+            profile.TrafficWindowStart = now;
+            profile.MessageCountLastMinute = 0;
+        }
+        profile.MessageCountLastMinute++;
+
+        if (profile.MessageCountLastMinute > 100) // örnek limit
+        {
+            AddAlert(profile.DeviceId, $"Aşırı trafik: Son 60 sn içinde {profile.MessageCountLastMinute} mesaj", topic);
+        }
+
+
+
         if (topic.Contains("ping"))
         {
             if (lastPing.TryGetValue(deviceId, out var last))
