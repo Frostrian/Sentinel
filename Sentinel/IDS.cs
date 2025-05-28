@@ -76,9 +76,18 @@ public static class IDS
         if (profileSource != null)
         {
             var others = profileSource.Invoke();
+
+            var spoofed = others.Any(p => p.DeviceId == deviceId && p.Ip != profile.Ip);
+            if (spoofed)
+            {
+                AddAlert(deviceId, $"SPOOF TESPİTİ: {deviceId} farklı IP ({profile.Ip}) üzerinden geldi!", topic);
+            }
+
             var conflict = others.Any(p => p.Ip == profile.Ip && p.DeviceId != deviceId);
             if (conflict)
-                AddAlert(deviceId, $"Aynı IP ({profile.Ip}) başka cihaz tarafından da kullanılıyor!", topic);
+            {
+                AddAlert(deviceId, $"ÇAKIŞMA: IP ({profile.Ip}) başka cihaz tarafından da kullanılıyor!", topic);
+            }
         }
 
         string key = $"{deviceId}:{topic}";
