@@ -3,11 +3,12 @@ using System.Collections.Generic;
 using System.Drawing;
 using System.Linq;
 using System.Text;
+using System.Text.Json;
 using System.Threading.Tasks;
 using MQTTnet;
 using MQTTnet.Client;
 using MQTTnet.Protocol;
-using static System.Windows.Forms.VisualStyles.VisualStyleElement;
+using Sentinel;
 
 namespace Sentinel
 {
@@ -21,7 +22,7 @@ namespace Sentinel
         private Action RefreshIDSAlerts;
         private Action<Action> uiDispatcher;
 
-        private List<DeviceProfile> RegisteredDevices = new();
+        private Dictionary<string, DeviceProfile> profileLookup = new(); // deviceId -> profile
 
         public MqttService(
             Action<string> logCallback,
@@ -36,7 +37,9 @@ namespace Sentinel
             uiDispatcher = uiSync;
             RefreshIDSAlerts = refreshIDSCallback;
             factory = new MqttFactory();
-            IDS.SetProfileSource(() => RegisteredDevices);
+
+            // IDS sistemine kaynak tanımla
+            IDS.SetProfileSource(() => profileLookup.Values.ToList());
         }
 
         public async Task ConnectAsync()
@@ -70,18 +73,17 @@ namespace Sentinel
         {
             try
             {
-                var authReq = System.Text.Json.JsonSerializer.Deserialize<AuthRequest>(json);
+
+                var authReq = JsonSerializer.Deserialize<AuthRequest>(json);
                 logAction($"🔐 Auth isteği: {authReq.deviceId} / {authReq.ip}");
 
-                var ipConflict = RegisteredDevices
-                    .FirstOrDefault(d => d.Ip == authReq.ip && d.DeviceId != authReq.deviceId);
-
-                if (ipConflict != null)
+                if (profileLookup.TryGetValue(authReq.deviceId, out var existingProfile))
                 {
-                    logAction($"🛑 IP ÇAKIŞMASI: {authReq.deviceId} ile {ipConflict.DeviceId} aynı IP ({authReq.ip}) kullanıyor!");
-
-                    // Tercihe bağlı: IDS'e de loglatılabilir
-                    IDS.AddExternalAlert($"🛑 IP ÇAKIŞMASI: {authReq.deviceId} ile {ipConflict.DeviceId} aynı IP ({authReq.ip})");
+                    if (existingProfile.Ip != authReq.ip)
+                    {
+                        IDS.AddExternalAlert($"🛑 SPOOF TESPİTİ: {authReq.deviceId} farklı IP ({authReq.ip}) üzerinden doğrulama gönderdi! Önceki IP: {existingProfile.Ip}");
+                    }
+                    return; // zaten kayıtlıysa ekleme
                 }
 
                 var profile = new DeviceProfile
@@ -93,7 +95,7 @@ namespace Sentinel
                     LastPing = DateTime.Now
                 };
 
-                RegisteredDevices.Add(profile);
+                profileLookup[authReq.deviceId] = profile;
 
                 var responseTopic = $"auth/{authReq.deviceId}/response";
                 var responseJson = "{\"status\":\"ok\",\"reason\":\"verified\"}";
@@ -101,10 +103,18 @@ namespace Sentinel
                 client.PublishAsync(new MqttApplicationMessageBuilder()
                     .WithTopic(responseTopic)
                     .WithPayload(responseJson)
-                    .WithQualityOfServiceLevel(MQTTnet.Protocol.MqttQualityOfServiceLevel.AtLeastOnce)
+                    .WithQualityOfServiceLevel(MqttQualityOfServiceLevel.AtLeastOnce)
                     .Build());
 
-                onDeviceAuth(profile);
+                onDeviceAuth(profile); // UI tarafına gönder
+
+            
+                
+                //var existing = ExtractDeviceId(profile.DeviceId);
+                //if (existing != null && existing.Ip != authReq.ip)
+                //{
+                //    IDS.AddExternalAlert($"🛑 SPOOF AUTH: {authReq.deviceId} daha önce {existing.Ip} ile kaydolmuştu, şimdi {authReq.ip}");
+                //}
             }
             catch (Exception ex)
             {
@@ -112,39 +122,61 @@ namespace Sentinel
             }
         }
 
-
         private void HandleData(string topic, string payload)
         {
             var deviceId = ExtractDeviceId(topic);
-            var profile = RegisteredDevices.FirstOrDefault(x => x.DeviceId == deviceId);
-            if (profile != null)
+            if (!profileLookup.TryGetValue(deviceId, out var profile))
             {
-                IDS.Analyze(profile, topic, payload);
-                logAction($"📡 {deviceId} verisi alındı: {topic}");
-
-                uiDispatcher(() =>
-                {
-                    onDataReceived(topic, payload);
-                    RefreshIDSAlerts();
-                });
-
-                profile.LastSeen = DateTime.Now;
-
-                // Konu bazlı zaman güncellemeleri
-                if (topic.Contains("heat")) profile.LastHeat = DateTime.Now;
-                else if (topic.Contains("ping")) profile.LastPing = DateTime.Now;
-                else if (topic.Contains("battery")) profile.LastBattery = DateTime.Now;
-                else if (topic.Contains("frame") || topic.Contains("status")) profile.LastCameraData = DateTime.Now;
-                else if (topic.Contains("alarm")) profile.LastAlarmData = DateTime.Now;
-                else if (topic.Contains("access")) profile.LastFingerprintData = DateTime.Now;
-                else if (topic.Contains("motion")) profile.LastMotionData = DateTime.Now;
+                string reason = $"⚠ Tanımsız cihazdan veri geldi: {deviceId} - [{topic}]";
+                IDS.RegisterUnknownDevice(deviceId, topic);
+                return;
             }
+
+            string incomingIp = ExtractedIpFromPayloadOrTopic(payload);
+            if (!string.IsNullOrEmpty(incomingIp) && incomingIp != profile.Ip)
+            {
+                IDS.AddExternalAlert($"🛑 SPOOF TESPİTİ: {deviceId} farklı IP ({incomingIp}) üzerinden veri gönderiyor! Kayıtlı IP: {profile.Ip}");
+            }
+
+            // IDS Analizi
+            IDS.Analyze(profile, topic, payload);
+            logAction($"📡 {deviceId} verisi alındı: {topic}");
+
+            // UI Update
+            uiDispatcher(() =>
+            {
+                onDataReceived(topic, payload);
+                RefreshIDSAlerts();
+            });
+
+            profile.LastSeen = DateTime.Now;
+
+            // Konuya göre zaman damgası güncelle
+            if (topic.Contains("heat")) profile.LastHeat = DateTime.Now;
+            else if (topic.Contains("ping")) profile.LastPing = DateTime.Now;
+            else if (topic.Contains("battery")) profile.LastBattery = DateTime.Now;
+            else if (topic.Contains("frame") || topic.Contains("status")) profile.LastCameraData = DateTime.Now;
+            else if (topic.Contains("alarm")) profile.LastAlarmData = DateTime.Now;
+            else if (topic.Contains("access")) profile.LastFingerprintData = DateTime.Now;
+            else if (topic.Contains("motion")) profile.LastMotionData = DateTime.Now;
         }
 
         private string ExtractDeviceId(string topic)
         {
             var parts = topic.Split('/');
             return parts.Length > 1 ? parts[1] : "UNKNOWN";
+        }
+
+        private string ExtractedIpFromPayloadOrTopic(string payload)
+        {
+            try
+            {
+                using var doc = JsonDocument.Parse(payload);
+                if (doc.RootElement.TryGetProperty("ip", out var ipProp))
+                    return ipProp.GetString();
+            }
+            catch { }
+            return null;
         }
 
         private string GuessDeviceType(string deviceId)

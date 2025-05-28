@@ -19,10 +19,19 @@ namespace Sentinel
 
         private void FormSentinel_Load(object sender, EventArgs e)
         {
-
+            IDS.SetBlacklistUI(listBoxBlackList, action => this.Invoke(action));
+            IDS.Initialize(listBoxAlerts, a => BeginInvoke(a));
         }
 
- 
+        private void btnRemoveFromBlacklist_Click(object sender, EventArgs e)
+        {
+            if (listBoxBlackList.SelectedItem != null)
+            {
+                string selectedDevice = listBoxBlackList.SelectedItem.ToString();
+                IDS.ResetIgnore(selectedDevice);
+                listBoxBlackList.Items.Remove(selectedDevice);
+            }
+        }
 
         public void Log(string msg)
         {

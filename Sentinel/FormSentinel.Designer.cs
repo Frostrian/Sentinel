@@ -49,6 +49,9 @@
             labelFPInfo = new Label();
             labelAlarmInfo = new Label();
             labelTraffic = new Label();
+            listBoxBlackList = new ListBox();
+            label9 = new Label();
+            btnRemoveFromBlacklist = new Button();
             SuspendLayout();
             // 
             // listBoxSensorData
@@ -88,7 +91,7 @@
             listBoxDevices.FormattingEnabled = true;
             listBoxDevices.Location = new Point(864, 28);
             listBoxDevices.Name = "listBoxDevices";
-            listBoxDevices.Size = new Size(437, 424);
+            listBoxDevices.Size = new Size(437, 379);
             listBoxDevices.TabIndex = 0;
             listBoxDevices.SelectedIndexChanged += listBoxDevices_SelectedIndexChanged;
             // 
@@ -164,16 +167,16 @@
             // 
             // rtbCihazInfo
             // 
-            rtbCihazInfo.Location = new Point(864, 487);
+            rtbCihazInfo.Location = new Point(864, 518);
             rtbCihazInfo.Name = "rtbCihazInfo";
-            rtbCihazInfo.Size = new Size(437, 345);
+            rtbCihazInfo.Size = new Size(437, 314);
             rtbCihazInfo.TabIndex = 1;
             rtbCihazInfo.Text = "";
             // 
             // label7
             // 
             label7.AutoSize = true;
-            label7.Location = new Point(870, 465);
+            label7.Location = new Point(872, 496);
             label7.Name = "label7";
             label7.Size = new Size(70, 15);
             label7.TabIndex = 2;
@@ -233,11 +236,40 @@
             labelTraffic.TabIndex = 2;
             labelTraffic.Text = "Veri bekleniyor..";
             // 
+            // listBoxBlackList
+            // 
+            listBoxBlackList.FormattingEnabled = true;
+            listBoxBlackList.Location = new Point(864, 439);
+            listBoxBlackList.Name = "listBoxBlackList";
+            listBoxBlackList.Size = new Size(437, 49);
+            listBoxBlackList.TabIndex = 0;
+            listBoxBlackList.SelectedIndexChanged += listBoxDevices_SelectedIndexChanged;
+            // 
+            // label9
+            // 
+            label9.AutoSize = true;
+            label9.Location = new Point(870, 418);
+            label9.Name = "label9";
+            label9.Size = new Size(97, 15);
+            label9.TabIndex = 2;
+            label9.Text = "Kara liste cihazlar";
+            // 
+            // btnRemoveFromBlacklist
+            // 
+            btnRemoveFromBlacklist.Location = new Point(1099, 410);
+            btnRemoveFromBlacklist.Name = "btnRemoveFromBlacklist";
+            btnRemoveFromBlacklist.Size = new Size(197, 23);
+            btnRemoveFromBlacklist.TabIndex = 3;
+            btnRemoveFromBlacklist.Text = "Seçili Cihazi Listeden Kaldır";
+            btnRemoveFromBlacklist.UseVisualStyleBackColor = true;
+            btnRemoveFromBlacklist.Click += btnRemoveFromBlacklist_Click;
+            // 
             // FormSentinel
             // 
             AutoScaleDimensions = new SizeF(7F, 15F);
             AutoScaleMode = AutoScaleMode.Font;
             ClientSize = new Size(1308, 844);
+            Controls.Add(btnRemoveFromBlacklist);
             Controls.Add(label6);
             Controls.Add(label5);
             Controls.Add(label4);
@@ -249,6 +281,7 @@
             Controls.Add(label3);
             Controls.Add(label8);
             Controls.Add(label2);
+            Controls.Add(label9);
             Controls.Add(label7);
             Controls.Add(label1);
             Controls.Add(rtbCihazInfo);
@@ -257,6 +290,7 @@
             Controls.Add(listBoxAlarmData);
             Controls.Add(listBoxFingerprintData);
             Controls.Add(listBoxCameraData);
+            Controls.Add(listBoxBlackList);
             Controls.Add(listBoxDevices);
             Controls.Add(listBoxSensorData);
             Name = "FormSentinel";
@@ -272,7 +306,6 @@
         private ListBox listBoxCameraData;
         private ListBox listBoxFingerprintData;
         private ListBox listBoxAlarmData;
-        private ListBox listBoxDevices;
         private RichTextBox txtLog;
         private ListBox listBoxAlerts;
         private Label label1;
@@ -289,5 +322,9 @@
         private Label labelFPInfo;
         private Label labelAlarmInfo;
         private Label labelTraffic;
+        public ListBox listBoxDevices;
+        public ListBox listBoxBlackList;
+        private Label label9;
+        private Button btnRemoveFromBlacklist;
     }
 }
